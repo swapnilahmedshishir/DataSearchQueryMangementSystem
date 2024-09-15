@@ -84,7 +84,7 @@ const CreateClinetList = () => {
     validationSchema: yup.object({
       division: yup.string().required("please select division"),
       district: yup.string().required("please select district"),
-      upazilla: yup.string().required("please select upazilla"),
+      upazilla: yup.string().nullable(),
       unionInfo: yup
         .string()
         .max(1000, "unionInfo max 1000 characters")
