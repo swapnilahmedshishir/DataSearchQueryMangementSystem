@@ -32,7 +32,7 @@ const Dashboard = () => {
     setDarkTheme((prevTheme) => !prevTheme);
   };
 
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
