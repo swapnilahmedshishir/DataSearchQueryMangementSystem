@@ -113,7 +113,10 @@ const ClientList = () => {
   // Filter clients based on division, district, and upazila
   const handleFilter = (e) => {
     const filteredData = clientList.filter((client) => {
-      return client.upazillaName.toLowerCase() === e?.toLowerCase();
+      return (
+        client.districtName.toLowerCase() === e?.toLowerCase() ||
+        client.upazillaName.toLowerCase() === e?.toLowerCase()
+      );
     });
     setFilteredClientList(filteredData);
   };
@@ -201,7 +204,7 @@ const ClientList = () => {
           <p className="success-message">{faqToDelete}</p>
         </div>
 
-        <div className="grid grid-cols-4 md:grid-cols-8 gap-7">
+        <div className="grid grid-cols-2 md:grid-cols-8 gap-7">
           {/* Division */}
           <div className="col-span-2 inputfield">
             <label htmlFor="division">Division</label>
@@ -229,7 +232,10 @@ const ClientList = () => {
               id="district"
               className="text_input_field"
               value={district}
-              onChange={(e) => handleDistrictChange(e.target.value)}
+              onChange={(e) => {
+                handleDistrictChange(e.target.value);
+                handleFilter(e.target.value);
+              }}
             >
               <option value="">Choose District</option>
               {districts.map((dist) => (
@@ -274,7 +280,7 @@ const ClientList = () => {
           </div>
         </div>
 
-        <p className="mb-2 text-xl">
+        <p className="my-7 text-xl">
           Total Result = {filteredClientList.length}
         </p>
         {/* Client List Display */}

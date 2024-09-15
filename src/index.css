@@ -838,3 +838,18 @@ label[for="files"]:active {
   padding: 1rem 1rem !important;
 }
 }
+
+@media (max-width:378px){
+  :where(.css-dev-only-do-not-override-14i19y2).ant-layout .ant-layout-sider-children .ant-menu.ant-menu-inline-collapsed {
+    width: 3rem;
+}
+:where(.css-dev-only-do-not-override-14i19y2).ant-layout .ant-layout-sider-children {
+   width: 3rem;
+}
+.ant-layout-sider-collapsed {
+  max-width: 10px !important;
+}
+.ant-layout-sider-collapsed {
+  min-width: 3rem!important;
+}
+}
