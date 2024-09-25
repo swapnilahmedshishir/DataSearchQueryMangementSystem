@@ -18,6 +18,16 @@ const MenuList = ({ darkTheme }) => {
           Dashbord
         </Link>
       </Menu.Item>
+
+      <Menu.Item
+        key="contactCategory"
+        icon={<MdContacts className="dashbord_icon" />}
+      >
+        <Link to="/dashboard/client" className="route_link">
+          Client
+        </Link>
+      </Menu.Item>
+
       <Menu.Item
         key="contactNumber"
         icon={<MdContactPhone className="dashbord_icon" />}
@@ -33,15 +43,6 @@ const MenuList = ({ darkTheme }) => {
       >
         <Link to="/dashboard/unionName" className="route_link">
           Search Union name
-        </Link>
-      </Menu.Item>
-
-      <Menu.Item
-        key="contactCategory"
-        icon={<MdContacts className="dashbord_icon" />}
-      >
-        <Link to="/dashboard/client" className="route_link">
-          Client
         </Link>
       </Menu.Item>
     </Menu>

@@ -40,15 +40,19 @@ const Dashboard = () => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
+
+  const handleClick = () => {
+    toggleCollapsed();
+  };
   return (
     <>
       <Layout>
         <Sider
-          className="sidebar"
           collapsed={collapsed}
           collapsible
           trigger={null}
           theme={darkTheme ? "dark" : "light"}
+          className={`sidebar`}
         >
           <Logo />
 
@@ -60,7 +64,7 @@ const Dashboard = () => {
             <Logout handleLogout={handleLogout} />
             <Button
               type="text"
-              onClick={toggleCollapsed}
+              onClick={handleClick}
               className="toggle"
               icon={collapsed ? <AiOutlineMenuUnfold /> : <AiOutlineMenuFold />}
             />

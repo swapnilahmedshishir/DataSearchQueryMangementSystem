@@ -15,6 +15,10 @@ const ShowClinetList = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [clientInfo, setClientInfo] = useState({});
 
+  // dision and districts
+  const [filteredDivision, setFilteredDivision] = useState(null);
+  const [filteredDistict, setFilteredDistict] = useState(null);
+
   //Data Fetching
   useEffect(() => {
     axios
@@ -43,6 +47,50 @@ const ShowClinetList = () => {
       })
       .catch((err) => setErrorMessage(err));
   }, [id, state.port]);
+
+  // Fetch divisions from API
+  const fetchDivisions = async () => {
+    try {
+      const res = await fetch("https://bdapi.vercel.app/api/v.1/division");
+      const data = await res.json();
+      // After setting divisions, filter based on clientInfo.division
+      const matchingDivision = data.data.find(
+        (division) => division.id === clientInfo.division
+      );
+      // Set the matching division to state
+      setFilteredDivision(matchingDivision);
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  };
+  // Fetch districts based on division ID
+  const fetchDistict = async () => {
+    try {
+      const res = await fetch(
+        `https://bdapi.vercel.app/api/v.1/district/${clientInfo.division}`
+      );
+      const data = await res.json();
+      // After setting divisions, filter based on clientInfo.division
+      const matchinDistict = data.data.find(
+        (dis) => dis.id === clientInfo.district
+      );
+      // Set the matching division to state
+      setFilteredDistict(matchinDistict);
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  };
+
+  // Call the fetchDivisions function when clientInfo.division is populated
+  useEffect(() => {
+    if (clientInfo.division) {
+      fetchDivisions();
+    }
+    if (clientInfo.district) {
+      fetchDistict();
+    }
+  }, [clientInfo.division, clientInfo.district]);
+
   return (
     <div className="container mx-auto px-4 py-6 dashboard_All">
       <div>
@@ -106,7 +154,7 @@ const ShowClinetList = () => {
                   <span> Union district </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-xl text-gray-500">
-                  {clientInfo.district}
+                  {filteredDistict?.name}
                 </td>
               </tr>
               <tr>
@@ -114,7 +162,7 @@ const ShowClinetList = () => {
                   <span> Union division</span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-xl text-gray-500">
-                  {clientInfo.division}
+                  {filteredDivision?.name}
                 </td>
               </tr>
               <tr>

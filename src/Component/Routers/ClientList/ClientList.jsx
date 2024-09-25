@@ -29,9 +29,6 @@ const ClientList = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [clientList, setClientList] = useState([]);
   const [filteredClientList, setFilteredClientList] = useState([]);
-  const [divisions, setDivisions] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [upazillas, setUpazillas] = useState([]);
   const [division, setDivision] = useState("");
   const [district, setDistrict] = useState("");
   const [upazila, setUpazila] = useState("");
@@ -46,53 +43,57 @@ const ClientList = () => {
   const [paginatedData, setPaginatedData] = useState([]);
   const itemsPerPage = 10;
 
+  // all fack data
+  // State
+  const [divisions, setDivisions] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [upazillas, setUpazillas] = useState([]);
+  const [error, setError] = useState(null);
+
   // Fetch divisions from API
-  const fetchDivisions = async () => {
+  const fetchDivisions = async (url) => {
     try {
-      const res = await fetch("https://bdapis.com/api/v1.2/divisions");
+      const res = await fetch(url);
       const data = await res.json();
       setDivisions(data.data);
     } catch (error) {
-      setErrorMessage(error.message);
+      setError(error.message);
     }
   };
 
   useEffect(() => {
-    fetchDivisions();
+    const endPoint = "https://bdapi.vercel.app/api/v.1/division";
+    fetchDivisions(endPoint);
   }, []);
 
-  // Fetch districts based on selected division
-  const handleDivisionChange = async (divisionName) => {
-    setDivision(divisionName);
-
+  // Handle division change
+  const handleDivisionChange = async (divisionID) => {
+    setDivision(divisionID); // Set the selected division ID
     try {
       const res = await fetch(
-        `https://bdapis.com/api/v1.2/division/${divisionName}`
+        `https://bdapi.vercel.app/api/v.1/district/${divisionID}`
       );
       const data = await res.json();
       setDistricts(data.data);
-      setUpazillas([]);
-      handleFilter();
+      setUpazillas([]); // Reset upazillas when division changes
     } catch (error) {
-      setErrorMessage(error.message);
+      setError(error.message);
     }
   };
 
-  // Fetch upazillas based on selected district
-  const handleDistrictChange = async (districtName) => {
-    setDistrict(districtName);
+  // Handle district change
+  const handleDistrictChange = async (districtID) => {
+    setDistrict(districtID); // Set the selected district ID
     try {
       const res = await fetch(
-        `https://bdapis.com/api/v1.2/district/${districtName}`
+        `https://bdapi.vercel.app/api/v.1/upazilla/${districtID}`
       );
       const data = await res.json();
-      setUpazillas(data.data.upazillas);
-      // handleFilter();
+      setUpazillas(data.data);
     } catch (error) {
-      setErrorMessage(error.message);
+      setError(error.message);
     }
   };
-
   // Fetch data from API
   useEffect(() => {
     axios
@@ -102,7 +103,7 @@ const ClientList = () => {
           setClientList(result.data.Result);
           // pagination
           setPaginatedData(result.data.Result.slice(0, itemsPerPage));
-          setFilteredClientList(result.data.Result); // Initially display all data
+          setFilteredClientList(result.data.Result);
         } else {
           setErrorMessage(result.data.Error);
         }
@@ -161,16 +162,6 @@ const ClientList = () => {
     setOpen(false);
   };
 
-  const handleSectedDataRefresh = () => {
-    // Reset all filters to default empty values
-    setDivision("");
-    setDistrict("");
-    setUpazila("");
-
-    // Reset the filtered client list to show all clients
-    setFilteredClientList(clientList);
-  };
-
   // pagination
   useEffect(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -184,23 +175,19 @@ const ClientList = () => {
   return (
     <div className="container dashboard_All">
       <ToastContainer />
-      <h1 className="dashboard_name">Client List</h1>
-      <hr />
-
       {errorMessage && <div className="error-message">{errorMessage}</div>}
-
       <div>
-        <div>
-          <Link to="/dashboard/client/create">
-            <button className="button-62 mb-8" role="button">
-              <span>New Client</span>
-              <span>
-                {" "}
-                <HiPlus />
-              </span>
-            </button>
-          </Link>
-
+        <div className="flex text-right">
+          <div>
+            <Link to="/dashboard/client/create">
+              <button className="button-62 mb-8" role="button">
+                <span>New Client</span>
+                <span>
+                  <HiPlus />
+                </span>
+              </button>
+            </Link>
+          </div>
           <p className="success-message">{faqToDelete}</p>
         </div>
 
@@ -217,8 +204,8 @@ const ClientList = () => {
             >
               <option value="">Choose Division</option>
               {divisions.map((dv) => (
-                <option key={dv.division} value={dv.division}>
-                  {dv.division}
+                <option key={dv.id} value={dv.id}>
+                  {dv.name}
                 </option>
               ))}
             </select>
@@ -231,7 +218,7 @@ const ClientList = () => {
               name="district"
               id="district"
               className="text_input_field"
-              value={district}
+              value={district} // Bind to state
               onChange={(e) => {
                 handleDistrictChange(e.target.value);
                 handleFilter(e.target.value);
@@ -239,8 +226,8 @@ const ClientList = () => {
             >
               <option value="">Choose District</option>
               {districts.map((dist) => (
-                <option key={dist.district} value={dist.district}>
-                  {dist.district}
+                <option key={dist.id} value={dist.id}>
+                  {dist.name}
                 </option>
               ))}
             </select>
@@ -253,38 +240,27 @@ const ClientList = () => {
               name="upazilla"
               id="upazilla"
               className="text_input_field"
-              value={upazila}
+              value={upazila} // Bind to state
               onChange={(e) => {
                 setUpazila(e.target.value);
                 handleFilter(e.target.value);
               }}
             >
               <option value="">Choose Upazilla</option>
-              {upazillas &&
-                upazillas.map((upa) => (
-                  <option key={upa} value={upa}>
-                    {upa}
-                  </option>
-                ))}
+              {upazillas.map((upa) => (
+                <option key={upa.id} value={upa.name}>
+                  {upa.name}
+                </option>
+              ))}
             </select>
-          </div>
-          {/* all sected data refresh  */}
-          <div className="col-span-2 place-self-center">
-            <button
-              className="button-62"
-              role="button"
-              onClick={() => handleSectedDataRefresh()}
-            >
-              <span>Data Refresh</span>
-            </button>
-          </div>
+          </div>        
         </div>
 
         <p className="my-7 text-xl">
           Total Result = {filteredClientList.length}
         </p>
         {/* Client List Display */}
-        <div className="grid gird-cols-1 md:grid-cols-4 gap-5 ">
+        <div className="grid gird-cols-1 md:grid-cols-3 gap-5 ">
           {filteredClientList.length > 0 ? (
             filteredClientList.map((cl, index) => (
               <div

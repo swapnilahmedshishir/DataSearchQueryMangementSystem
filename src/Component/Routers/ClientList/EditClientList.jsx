@@ -9,13 +9,11 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { Link } from "react-router-dom";
 import { AppContext } from "../../../Dashbord/SmallComponent/AppContext";
 
-const EditClinetList = () => {
+const EditClientList = () => {
   const { state } = useContext(AppContext);
-  // Router
   const { id } = useParams();
   const navigate = useNavigate();
 
-  //state
   const [clientInfo, setClientInfo] = useState({});
   const [errorMessage, setErrorMessage] = useState(null);
   const [divisions, setDivisions] = useState([]);
@@ -23,7 +21,10 @@ const EditClinetList = () => {
   const [upazillas, setUpazillas] = useState([]);
   const [error, setError] = useState(null);
 
-  // Fetch divisions from API using fetch
+  const [divisionChanged, setDivisionChanged] = useState(false);
+  const [districtChanged, setDistrictChanged] = useState(false);
+
+  // Fetch divisions
   const fetchDivisions = async (url) => {
     try {
       const res = await fetch(url);
@@ -35,45 +36,56 @@ const EditClinetList = () => {
   };
 
   useEffect(() => {
-    const endPoint = "https://bdapis.com/api/v1.2/divisions";
+    const endPoint = "https://bdapi.vercel.app/api/v.1/division";
     fetchDivisions(endPoint);
   }, []);
 
-  // Fetch districts based on selected division using fetch
-  const handleDivisionChange = async (divisionName) => {
+  // Fetch districts when division is changed
+  const handleDivisionChange = async (divisionID) => {
+    setDivisionChanged(true); // Mark division as changed
+    setDistrictChanged(false); // Reset district change flag
+    formik.setFieldValue("district", "");
+    formik.setFieldValue("upazilla", "");
+    setUpazillas([]); // Clear upazilla if division changes
+
+    if (!divisionID) return;
+
     try {
       const res = await fetch(
-        `https://bdapis.com/api/v1.2/division/${divisionName}`
+        `https://bdapi.vercel.app/api/v.1/district/${divisionID}`
       );
       const data = await res.json();
       setDistricts(data.data);
-      setUpazillas([]); // Clear upazillas when division changes
     } catch (error) {
       setError(error.message);
     }
   };
 
-  // Fetch upazillas based on selected district using fetch
-  const handleDistrictChange = async (districtName) => {
+  // Fetch upazillas when district is changed
+  const handleDistrictChange = async (districtID) => {
+    setDistrictChanged(true); // Mark district as changed
+    formik.setFieldValue("upazilla", "");
+
+    if (!districtID) return;
+
     try {
       const res = await fetch(
-        `https://bdapis.com/api/v1.2/district/${districtName}`
+        `https://bdapi.vercel.app/api/v.1/upazilla/${districtID}`
       );
       const data = await res.json();
-      setUpazillas(data.data.upazillas);
+      setUpazillas(data.data);
     } catch (error) {
       setError(error.message);
     }
   };
 
-  // fetch data
+  // Fetch client info
   useEffect(() => {
     axios
       .get(`${state.port}/api/admin/clientlist/${id}`)
       .then((result) => {
         if (result.data.Status) {
           setClientInfo({
-            ...clientInfo,
             division: result.data.Result[0].divisionName,
             district: result.data.Result[0].districtName,
             upazilla: result.data.Result[0].upazillaName,
@@ -95,9 +107,7 @@ const EditClinetList = () => {
       .catch((err) => setErrorMessage(err));
   }, [state.port, id]);
 
-  console.log(clientInfo);
-
-  // use fromik method
+  // Formik setup
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -114,6 +124,16 @@ const EditClinetList = () => {
       upWhatsappNumber: clientInfo.upWhatsappNumber || "",
       gender: clientInfo.gender || "",
       unionInfo: clientInfo.unionInfo || "",
+    },
+    validate: (values) => {
+      const errors = {};
+      if (divisionChanged && !values.district) {
+        errors.district = "District is required if division changes";
+      }
+      if (districtChanged && !values.upazilla) {
+        errors.upazilla = "Upazilla is required if district changes";
+      }
+      return errors;
     },
     onSubmit: async (values, { resetForm }) => {
       try {
@@ -133,17 +153,15 @@ const EditClinetList = () => {
             progress: undefined,
             theme: "light",
           });
-          const delay = 1500; // 1.5 seconds delay
+          const delay = 1500;
           const timer = setTimeout(() => {
             navigate("/dashboard/client");
           }, delay);
-          // Clear the timer if the component unmounts before the delay is complete
           return () => clearTimeout(timer);
         }
       } catch (error) {
         setErrorMessage(`${error}`);
       }
-
       resetForm();
     },
   });
@@ -153,41 +171,31 @@ const EditClinetList = () => {
       <ToastContainer />
       <h5>
         <Link to="/dashboard/client" className="route_link">
-          {" "}
           <IoMdArrowRoundBack /> Back
         </Link>
       </h5>
-      <h1 className="dashboard_name">Edit client list</h1>
       <hr />
-      {/* <p>{formattedValue}</p> */}
       {errorMessage && <div className="error-message">{errorMessage}</div>}
-      {/* form start */}
-      {/* ++++++========part 1 =======++++++++ */}
       <div className="from_div">
-        <form
-          onSubmit={formik.handleSubmit}
-          className="p-4"
-          encType="multipart/form-data"
-        >
+        <form onSubmit={formik.handleSubmit} className="p-4">
           <div className="grid grid-col-1 md:grid-cols-6 gap-7">
             {/* Division */}
             <div className="md:col-span-2 inputfield">
               <label htmlFor="division">Division</label>
-
               <select
                 name="division"
                 id="division"
                 className="text_input_field"
                 value={formik.values.division}
                 onChange={(e) => {
-                  formik.setFieldValue("division", e.target.value);
+                  formik.handleChange(e);
                   handleDivisionChange(e.target.value);
                 }}
               >
                 <option value="">Choose Division</option>
                 {divisions.map((dv) => (
-                  <option key={dv.division} value={dv.division}>
-                    {dv.division}
+                  <option key={dv.id} value={dv.id}>
+                    {dv.name}
                   </option>
                 ))}
               </select>
@@ -196,30 +204,31 @@ const EditClinetList = () => {
             {/* District */}
             <div className="md:col-span-2 inputfield">
               <label htmlFor="district">District</label>
-
               <select
                 name="district"
                 id="district"
                 className="text_input_field"
                 value={formik.values.district}
                 onChange={(e) => {
-                  formik.setFieldValue("district", e.target.value);
+                  formik.handleChange(e);
                   handleDistrictChange(e.target.value);
                 }}
               >
                 <option value="">Choose District</option>
                 {districts.map((dist) => (
-                  <option key={dist.district} value={dist.district}>
-                    {dist.district}
+                  <option key={dist.id} value={dist.id}>
+                    {dist.name}
                   </option>
                 ))}
               </select>
+              {formik.errors.district && (
+                <div className="error">{formik.errors.district}</div>
+              )}
             </div>
 
             {/* Upazilla */}
             <div className="md:col-span-2 inputfield">
               <label htmlFor="upazilla">Upazilla</label>
-
               <select
                 name="upazilla"
                 id="upazilla"
@@ -228,202 +237,204 @@ const EditClinetList = () => {
                 onChange={formik.handleChange}
               >
                 <option value="">Choose Upazilla</option>
-                {upazillas &&
-                  upazillas.map((upa) => (
-                    <option key={upa} value={upa}>
-                      {upa}
-                    </option>
-                  ))}
+                {upazillas.map((upazilla) => (
+                  <option key={upazilla.id} value={upazilla.id}>
+                    {upazilla.name}
+                  </option>
+                ))}
               </select>
+              {formik.errors.upazilla && (
+                <div className="error">{formik.errors.upazilla}</div>
+              )}
             </div>
-            {/* up Name  english*/}
-            <div className="md:col-span-3 inputfield">
-              <label htmlFor="unNameEn">union name english</label>
+          </div>
 
-              <input
-                className="text_input_field"
-                type="text"
-                name="unNameEn"
-                onChange={formik.handleChange}
-                placeholder="Write union name english"
-                value={formik.values.unNameEn}
-              />
-            </div>
+          {/* up Name  english*/}
+          <div className="md:col-span-3 inputfield">
+            <label htmlFor="unNameEn">union name english</label>
 
-            {/* up Name  bangla*/}
-            <div className="md:col-span-3 inputfield">
-              <label htmlFor="unNameBn">union name bangla</label>
+            <input
+              className="text_input_field"
+              type="text"
+              name="unNameEn"
+              onChange={formik.handleChange}
+              placeholder="Write union name english"
+              value={formik.values.unNameEn}
+            />
+          </div>
 
-              <input
-                className="text_input_field"
-                type="text"
-                name="unNameBn"
-                onChange={formik.handleChange}
-                placeholder="Write union name bangla"
-                value={formik.values.unNameBn}
-              />
-            </div>
+          {/* up Name  bangla*/}
+          <div className="md:col-span-3 inputfield">
+            <label htmlFor="unNameBn">union name bangla</label>
 
-            {/* up linke1 */}
-            <div className="md:col-span-3 inputfield">
-              <label htmlFor="unLinkOne">union link 1</label>
+            <input
+              className="text_input_field"
+              type="text"
+              name="unNameBn"
+              onChange={formik.handleChange}
+              placeholder="Write union name bangla"
+              value={formik.values.unNameBn}
+            />
+          </div>
 
-              <input
-                className="text_input_field"
-                type="text"
-                name="unLinkOne"
-                onChange={formik.handleChange}
-                placeholder="Give union link 1"
-                value={formik.values.unLinkOne}
-              />
-            </div>
-            {/* up linke2 */}
-            <div className="md:col-span-3 inputfield">
-              <label htmlFor="unLinkTwo">union link 2 </label>
+          {/* up linke1 */}
+          <div className="md:col-span-3 inputfield">
+            <label htmlFor="unLinkOne">union link 1</label>
 
-              <input
-                className="text_input_field"
-                type="text"
-                name="unLinkTwo"
-                onChange={formik.handleChange}
-                placeholder="Give union link 2"
-                value={formik.values.unLinkTwo}
-              />
-            </div>
+            <input
+              className="text_input_field"
+              type="text"
+              name="unLinkOne"
+              onChange={formik.handleChange}
+              placeholder="Give union link 1"
+              value={formik.values.unLinkOne}
+            />
+          </div>
+          {/* up linke2 */}
+          <div className="md:col-span-3 inputfield">
+            <label htmlFor="unLinkTwo">union link 2 </label>
 
-            {/* up secretary(সচিব) Name  */}
-            <div className="inputfield md:col-span-3">
-              <label htmlFor="upSecretaryName">Union secretary name</label>
+            <input
+              className="text_input_field"
+              type="text"
+              name="unLinkTwo"
+              onChange={formik.handleChange}
+              placeholder="Give union link 2"
+              value={formik.values.unLinkTwo}
+            />
+          </div>
 
-              <input
-                className="text_input_field"
-                type="text"
-                name="upSecretaryName"
-                onChange={formik.handleChange}
-                placeholder="Write union secretary name"
-                value={formik.values.upSecretaryName}
-              />
-            </div>
+          {/* up secretary(সচিব) Name  */}
+          <div className="inputfield md:col-span-3">
+            <label htmlFor="upSecretaryName">Union secretary name</label>
 
-            {/* up secretary Email Address  */}
-            <div className="md:col-span-3 inputfield">
-              <label htmlFor="UpEmail">email address</label>
+            <input
+              className="text_input_field"
+              type="text"
+              name="upSecretaryName"
+              onChange={formik.handleChange}
+              placeholder="Write union secretary name"
+              value={formik.values.upSecretaryName}
+            />
+          </div>
 
-              <input
-                className="text_input_field"
-                type="text"
-                name="UpEmail"
-                onChange={formik.handleChange}
-                placeholder="Write email address"
-                value={formik.values.UpEmail}
-              />
-            </div>
+          {/* up secretary Email Address  */}
+          <div className="md:col-span-3 inputfield">
+            <label htmlFor="UpEmail">email address</label>
 
-            {/* up secretary contact Number  */}
-            <div className="md:col-span-2 inputfield">
-              <label htmlFor="upContactNumber">contact Number</label>
+            <input
+              className="text_input_field"
+              type="text"
+              name="UpEmail"
+              onChange={formik.handleChange}
+              placeholder="Write email address"
+              value={formik.values.UpEmail}
+            />
+          </div>
 
-              <input
-                className="text_input_field"
-                type="text"
-                name="upContactNumber"
-                onChange={formik.handleChange}
-                placeholder="Write contact number"
-                value={formik.values.upContactNumber}
-              />
-            </div>
-            {/* up secretary Whatsapp Number  */}
-            <div className="md:col-span-2 inputfield">
-              <label htmlFor="upWhatsappNumber">WhatsApp Number</label>
+          {/* up secretary contact Number  */}
+          <div className="md:col-span-2 inputfield">
+            <label htmlFor="upContactNumber">contact Number</label>
 
-              <input
-                className="text_input_field"
-                type="text"
-                name="upWhatsappNumber"
-                onChange={formik.handleChange}
-                placeholder="Write Whatsapp number"
-                value={formik.values.upWhatsappNumber}
-              />
-            </div>
+            <input
+              className="text_input_field"
+              type="text"
+              name="upContactNumber"
+              onChange={formik.handleChange}
+              placeholder="Write contact number"
+              value={formik.values.upContactNumber}
+            />
+          </div>
+          {/* up secretary Whatsapp Number  */}
+          <div className="md:col-span-2 inputfield">
+            <label htmlFor="upWhatsappNumber">WhatsApp Number</label>
 
-            {/* up secretary gender */}
-            <div className="md:col-span-2 inputfield">
-              <label htmlFor="gender">gender</label>
+            <input
+              className="text_input_field"
+              type="text"
+              name="upWhatsappNumber"
+              onChange={formik.handleChange}
+              placeholder="Write Whatsapp number"
+              value={formik.values.upWhatsappNumber}
+            />
+          </div>
 
-              <select
-                name="gender"
-                id="gender"
-                className="text_input_field"
-                value={formik.values.gender}
-                onChange={(e) => formik.setFieldValue("gender", e.target.value)}
-              >
-                <option value="" selected>
-                  Choose gender
-                </option>
-                <option value="male" selected>
-                  Male
-                </option>
-                <option value="female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
+          {/* up secretary gender */}
+          <div className="md:col-span-2 inputfield">
+            <label htmlFor="gender">gender</label>
 
-            {/* union info note */}
-            <div className="md:col-span-6 inputfield">
-              <h5 className="text-xl font-extrabold">union info note </h5>
+            <select
+              name="gender"
+              id="gender"
+              className="text_input_field"
+              value={formik.values.gender}
+              onChange={(e) => formik.setFieldValue("gender", e.target.value)}
+            >
+              <option value="" selected>
+                Choose gender
+              </option>
+              <option value="male" selected>
+                Male
+              </option>
+              <option value="female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
 
-              <Editor
-                id="unionInfo"
-                apiKey="heppko8q7wimjwb1q87ctvcpcpmwm5nckxpo4s28mnn2dgkb"
-                textareaName="unionInfo"
-                initialValue="Write union infomation"
-                onEditorChange={(content) => {
-                  formik.setFieldValue("unionInfo", content);
-                }}
-                init={{
-                  height: 350,
-                  menubar: false,
-                  plugins: [
-                    "advlist",
-                    "autolink",
-                    "lists",
-                    "link",
-                    "image",
-                    "charmap",
-                    "preview",
-                    "anchor",
-                    "searchreplace",
-                    "visualblocks",
-                    "code",
-                    "fullscreen",
-                    "insertdatetime",
-                    "media",
-                    "table",
-                    "code",
-                    "help",
-                    "wordcount",
-                  ],
-                  toolbar:
-                    "undo redo |fullscreen blocks|" +
-                    "bold italic forecolor fontsize |code link image preview| alignleft aligncenter " +
-                    "alignright alignjustify | bullist numlist outdent indent | table | " +
-                    "removeformat | help",
-                  content_style:
-                    "body { font-family:Helvetica,Arial,sans-serif; font-size: 1rem;  color: #3f3e3e; }",
-                }}
-              />
-            </div>
+          {/* union info note */}
+          <div className="md:col-span-6 inputfield">
+            <h5 className="text-xl font-extrabold">union info note </h5>
 
-            {/* Submit Button */}
-            <div className="col-md-12 inputFiledMiddel">
-              <button
-                type="submit"
-                className="button-62 cetificate_image_AddBtn "
-                role="button"
-              >
-                ADD Clent
-              </button>
-            </div>
+            <Editor
+              id="unionInfo"
+              apiKey="heppko8q7wimjwb1q87ctvcpcpmwm5nckxpo4s28mnn2dgkb"
+              textareaName="unionInfo"
+              initialValue="Write union infomation"
+              onEditorChange={(content) => {
+                formik.setFieldValue("unionInfo", content);
+              }}
+              init={{
+                height: 350,
+                menubar: false,
+                plugins: [
+                  "advlist",
+                  "autolink",
+                  "lists",
+                  "link",
+                  "image",
+                  "charmap",
+                  "preview",
+                  "anchor",
+                  "searchreplace",
+                  "visualblocks",
+                  "code",
+                  "fullscreen",
+                  "insertdatetime",
+                  "media",
+                  "table",
+                  "code",
+                  "help",
+                  "wordcount",
+                ],
+                toolbar:
+                  "undo redo |fullscreen blocks|" +
+                  "bold italic forecolor fontsize |code link image preview| alignleft aligncenter " +
+                  "alignright alignjustify | bullist numlist outdent indent | table | " +
+                  "removeformat | help",
+                content_style:
+                  "body { font-family:Helvetica,Arial,sans-serif; font-size: 1rem;  color: #3f3e3e; }",
+              }}
+            />
+          </div>
+          {/* Submit Button */}
+          <div className="col-md-12 inputFiledMiddel">
+            <button
+              type="submit"
+              className="button-62 cetificate_image_AddBtn "
+              role="button"
+            >
+              Edit Client
+            </button>
           </div>
         </form>
       </div>
@@ -431,4 +442,4 @@ const EditClinetList = () => {
   );
 };
 
-export default EditClinetList;
+export default EditClientList;

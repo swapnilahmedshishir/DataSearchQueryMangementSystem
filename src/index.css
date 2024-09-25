@@ -27,13 +27,21 @@
   --font-main: "DM Sans", sans-serif;
 }
 /* data show route  */
-.allClinetDataShow{
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
-        background: linear-gradient(88deg, #01b5e8 -11.16%, #7752fe 46.95%, #732bf7 94.89%);
-    cursor: pointer;
+.allClinetDataShow {
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+    rgba(0, 0, 0, 0.3) 0px 30px 60px -30px,
+    rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+  background: linear-gradient(
+    88deg,
+    #01b5e8 -11.16%,
+    #7752fe 46.95%,
+    #732bf7 94.89%
+  );
+  cursor: pointer;
 }
 /* tiny blog write  */
-.tox-statusbar__branding , .tox-statusbar__help-text{
+.tox-statusbar__branding,
+.tox-statusbar__help-text {
   display: none;
 }
 .route_link {
@@ -41,7 +49,7 @@
   text-transform: capitalize;
 }
 .dashboard_All {
-  padding: 40px 20px;
+  padding: 0px 20px;
 }
 .image_preview {
   max-width: 500px;
@@ -68,7 +76,7 @@
   display: flex;
   align-items: center;
 }
-.thumble_inputField_style{
+.thumble_inputField_style {
   margin-top: 40px;
 }
 .text_input_field {
@@ -83,17 +91,7 @@
 .text_input_field:focus {
   outline: none;
 }
-.dashboard_name {
-  text-align: center;
-  font-size: 2rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2rem;
-  font-weight: 700;
-  background-image: linear-gradient(90deg, #01b6e873, #7752fe);
-  -webkit-background-clip: text;
-  color: transparent;
-  text-fill-color: transparent;
-}
+
 .reqired_symbole {
   font-size: 10px;
   color: #e16565;
@@ -135,7 +133,7 @@ ul li a {
 
 .loginPage {
   background: url(/bannerImage/pattern2.png),
-    linear-gradient(238.34deg, #8429f8 1.69%, #060044 20.54%);  
+    linear-gradient(238.34deg, #8429f8 1.69%, #060044 20.54%);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -175,14 +173,10 @@ ul li a {
 /* =========================================== */
 /* dashboard start  */
 .main_router {
-  padding: 2rem 1.5rem 4.8rem 1.5rem;
   background: #171450;
   color: white;
 }
 
-.dashboard-container .dashboard_name {
-  margin-bottom: 1.5rem;
-}
 .dashboard-card {
   margin-bottom: 3rem;
   border-radius: 5px;
@@ -329,7 +323,7 @@ ul li a {
   margin-left: 15px;
   color: white;
   border-color: #001529 !important;
-    background-color: #001529 !important;
+  background-color: #001529 !important;
 }
 .toggle:hover {
   color: white !important;
@@ -795,7 +789,7 @@ label[for="files"]:active {
   .grid_container {
     grid-template-columns: auto;
   }
-  .loginForm{
+  .loginForm {
     width: 35%;
   }
 }
@@ -803,7 +797,7 @@ label[for="files"]:active {
   /* ...
 	// rules here apply to devices from 769px to 992px (inclusive)
 	... */
-  .loginForm{
+  .loginForm {
     width: 50%;
   }
 }
@@ -811,6 +805,8 @@ label[for="files"]:active {
   /* ...
 	// rules here apply to devices from 0px to 768px (inclusive)
 	... */
+
+  /* =============== */
   .image_preview {
     max-width: 250px;
     height: auto;
@@ -822,34 +818,37 @@ label[for="files"]:active {
     margin-left: 10px;
     margin-right: 10px;
   }
-  .loginForm{
+  .loginForm {
     width: 100%;
   }
-  .time{
+  .time {
     margin-left: 3rem;
   }
   .dashboard_All {
     padding: 0px 2px;
-}
-.main_router {
-  padding: 0rem 0.5rem 4.8rem 0.5rem;
-}
-.from_div form {
-  padding: 1rem 1rem !important;
-}
+  }
+  .main_router {
+    padding: 0rem 0.5rem 4.8rem 0.5rem;
+  }
+  .from_div form {
+    padding: 1rem 1rem !important;
+  }
 }
 
-@media (max-width:378px){
-  :where(.css-dev-only-do-not-override-14i19y2).ant-layout .ant-layout-sider-children .ant-menu.ant-menu-inline-collapsed {
+@media (max-width: 378px) {
+  :where(.css-dev-only-do-not-override-14i19y2).ant-layout
+    .ant-layout-sider-children
+    .ant-menu.ant-menu-inline-collapsed {
     width: 3rem;
-}
-:where(.css-dev-only-do-not-override-14i19y2).ant-layout .ant-layout-sider-children {
-   width: 3rem;
-}
-.ant-layout-sider-collapsed {
-  max-width: 10px !important;
-}
-.ant-layout-sider-collapsed {
-  min-width: 3rem!important;
-}
+  }
+  :where(.css-dev-only-do-not-override-14i19y2).ant-layout
+    .ant-layout-sider-children {
+    width: 3rem;
+  }
+  .ant-layout-sider-collapsed {
+    max-width: 10px !important;
+  }
+  .ant-layout-sider-collapsed {
+    min-width: 3rem !important;
+  }
 }

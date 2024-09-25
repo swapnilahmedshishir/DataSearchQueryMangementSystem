@@ -108,25 +108,11 @@ const SearchContactNumber = () => {
   return (
     <div className="container dashboard_All">
       <ToastContainer />
-      <h1 className="dashboard_name">Client List</h1>
       <hr />
 
       {errorMessage && <div className="error-message">{errorMessage}</div>}
 
       <div>
-        <div>
-          <Link to="/dashboard/client/create">
-            <button className="button-62 mb-8" role="button">
-              <span>New Client</span>
-              <span>
-                <HiPlus />
-              </span>
-            </button>
-          </Link>
-
-          <p className="success-message">{faqToDelete}</p>
-        </div>
-
         {/* Search by upContactNumber */}
         <div className="mb-5 grid grid-cols-2">
           <label htmlFor="upContactNumber" className="col-span-2">
@@ -155,7 +141,7 @@ const SearchContactNumber = () => {
         </p>
 
         {/* Client List Display */}
-        <div className="grid gird-cols-1 md:grid-cols-4 gap-5 ">
+        <div className="grid gird-cols-1 md:grid-cols-3 gap-5 ">
           {filteredClientList.length > 0 ? (
             filteredClientList.map((cl, index) => (
               <div

@@ -8,18 +8,20 @@ import { IoStarSharp } from "react-icons/io5";
 import { Editor } from "@tinymce/tinymce-react";
 import * as yup from "yup";
 
-const CreateClinetList = () => {
+const CreateClientList = () => {
   const { state } = useContext(AppContext);
   const navigate = useNavigate();
 
-  //state
+  // State
   const [errorMessage, setErrorMessage] = useState(null);
   const [divisions, setDivisions] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [upazillas, setUpazillas] = useState([]);
   const [error, setError] = useState(null);
 
-  // Fetch divisions from API using fetch
+  // all fack data
+
+  // Fetch divisions from API
   const fetchDivisions = async (url) => {
     try {
       const res = await fetch(url);
@@ -31,34 +33,32 @@ const CreateClinetList = () => {
   };
 
   useEffect(() => {
-    const endPoint = "https://bdapis.com/api/v1.2/divisions";
+    const endPoint = "https://bdapi.vercel.app/api/v.1/division";
     fetchDivisions(endPoint);
   }, []);
 
-  // Fetch districts based on selected division using fetch
-  const handleDivisionChange = async (divisionName) => {
+  // Fetch districts based on division ID
+  const handleDivisionChange = async (divisionID) => {
     try {
       const res = await fetch(
-        `https://bdapis.com/api/v1.2/division/${divisionName}`
+        `https://bdapi.vercel.app/api/v.1/district/${divisionID}`
       );
       const data = await res.json();
       setDistricts(data.data);
-      setUpazillas([]); // Clear upazillas when division changes
+      setUpazillas([]); // Reset upazillas when division changes
     } catch (error) {
       setError(error.message);
     }
   };
 
-  // Fetch upazillas based on selected district using fetch
-  const handleDistrictChange = async (districtName) => {
-    console.log(districtName);
-
+  // Fetch upazillas based on district ID
+  const handleDistrictChange = async (districtID) => {
     try {
       const res = await fetch(
-        `https://bdapis.com/api/v1.2/district/${districtName}`
+        `https://bdapi.vercel.app/api/v.1/upazilla/${districtID}`
       );
       const data = await res.json();
-      setUpazillas(data.data.upazillas);
+      setUpazillas(data.data);
     } catch (error) {
       setError(error.message);
     }
@@ -82,22 +82,22 @@ const CreateClinetList = () => {
       unionInfo: "",
     },
     validationSchema: yup.object({
-      division: yup.string().required("please select division"),
-      district: yup.string().required("please select district"),
+      division: yup.string().required("Please select a division"),
+      district: yup.string().required("Please select a district"),
       upazilla: yup.string().nullable(),
       unionInfo: yup
         .string()
-        .max(1000, "unionInfo max 1000 characters")
+        .max(1000, "Union Info must be under 1000 characters")
         .nullable(),
       unNameEn: yup
         .string()
         .min(3, "Union name must be at least 3 characters")
-        .max(299, "Union name max 299 characters")
+        .max(299, "Union name must be under 299 characters")
         .required("Union name is required"),
       unNameBn: yup
         .string()
         .min(3, "Union name must be at least 3 characters")
-        .max(299, "Union name max 299 characters")
+        .max(299, "Union name must be under 299 characters")
         .required("Union name is required"),
       UpEmail: yup
         .string()
@@ -105,35 +105,27 @@ const CreateClinetList = () => {
         .required("Email is required"),
       upContactNumber: yup
         .string()
-        .matches(
-          /^(\d{1,3}[- ]?)?\d{10}$/,
-          "number is not valid. It should be 10 digits."
-        )
-        .required("number is required"),
+        .matches(/^\d{11}$/, "Contact number should be 11 digits")
+        .required("Contact number is required"),
       upWhatsappNumber: yup
         .string()
-        .matches(
-          /^(\d{1,3}[- ]?)?\d{10}$/,
-          "number is not valid. It should be 10 digits."
-        )
+        .matches(/^\d{11}$/, "Whatsapp number should be 11 digits")
         .nullable(),
       unLinkOne: yup
         .string()
-        .url("Link is not valid use (https://)")
+        .url("Invalid URL format (use https://)")
         .required("Link 1 is required"),
       unLinkTwo: yup
         .string()
-        .url("Link is not valid use (https://)")
+        .url("Invalid URL format (use https://)")
         .nullable(),
       upSecretaryName: yup
         .string()
         .min(3, "Name must be at least 3 characters")
-        .max(150, "Name max 150 characters")
-        .required("Name is required"),
+        .max(150, "Name must be under 150 characters")
+        .required("Secretary name is required"),
     }),
     onSubmit: async (values, { resetForm }) => {
-      console.log(values);
-
       try {
         const response = await fetch(
           `${state.port}/api/admin/clientlist/create`,
@@ -147,8 +139,7 @@ const CreateClinetList = () => {
         );
         const result = await response.json();
         if (result.Status) {
-          setErrorMessage(null);
-          toast.success(`Client created successfully`, {
+          toast.success("Client created successfully", {
             position: "top-right",
             autoClose: 5000,
           });
@@ -166,7 +157,6 @@ const CreateClinetList = () => {
   return (
     <div className="container mx-auto px-4 py-6 dashboard_All">
       <ToastContainer />
-      <h1 className="dashboard_name">Create Client</h1>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <div className="form_div">
         <form onSubmit={formik.handleSubmit} className="p-2">
@@ -191,8 +181,8 @@ const CreateClinetList = () => {
               >
                 <option value="">Choose Division</option>
                 {divisions.map((dv) => (
-                  <option key={dv.division} value={dv.division}>
-                    {dv.division}
+                  <option key={dv.id} value={dv.id}>
+                    {dv.name}
                   </option>
                 ))}
               </select>
@@ -203,7 +193,6 @@ const CreateClinetList = () => {
               <label htmlFor="district">
                 District <IoStarSharp className="reqired_symbole" />
               </label>
-
               {formik.touched.district && formik.errors.district && (
                 <span className="error-message">{formik.errors.district}</span>
               )}
@@ -219,8 +208,8 @@ const CreateClinetList = () => {
               >
                 <option value="">Choose District</option>
                 {districts.map((dist) => (
-                  <option key={dist.district} value={dist.district}>
-                    {dist.district}
+                  <option key={dist.id} value={dist.id}>
+                    {dist.name}
                   </option>
                 ))}
               </select>
@@ -231,7 +220,6 @@ const CreateClinetList = () => {
               <label htmlFor="upazilla">
                 Upazilla <IoStarSharp className="reqired_symbole" />
               </label>
-
               {formik.touched.upazilla && formik.errors.upazilla && (
                 <span className="error-message">{formik.errors.upazilla}</span>
               )}
@@ -243,12 +231,11 @@ const CreateClinetList = () => {
                 onChange={formik.handleChange}
               >
                 <option value="">Choose Upazilla</option>
-                {upazillas &&
-                  upazillas.map((upa) => (
-                    <option key={upa} value={upa}>
-                      {upa}
-                    </option>
-                  ))}
+                {upazillas.map((upa) => (
+                  <option key={upa.id} value={upa.name}>
+                    {upa.name}
+                  </option>
+                ))}
               </select>
             </div>
             {/* up Name  english*/}
@@ -498,4 +485,4 @@ const CreateClinetList = () => {
   );
 };
 
-export default CreateClinetList;
+export default CreateClientList;
