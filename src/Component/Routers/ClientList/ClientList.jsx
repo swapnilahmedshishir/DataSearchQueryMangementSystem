@@ -21,6 +21,7 @@ import {
 import { BsExclamationCircle } from "react-icons/bs";
 import { HiPlus } from "react-icons/hi";
 import Pagination from "../../Pagination/Pagination";
+import ReactHTMLTableToExcel from "react-html-table-to-excel";
 
 const ClientList = () => {
   const { state } = useContext(AppContext);
@@ -32,6 +33,9 @@ const ClientList = () => {
   const [division, setDivision] = useState("");
   const [district, setDistrict] = useState("");
   const [upazila, setUpazila] = useState("");
+  const [divisionName, setDivisionName] = useState("");
+  const [districtName, setDistrictName] = useState("");
+  const [UpazilaName, setUpazilaName] = useState("");
 
   const [open, setOpen] = useState(false);
   const [dataDeleteId, setDataDeleteId] = useState(null);
@@ -69,13 +73,18 @@ const ClientList = () => {
   // Handle division change
   const handleDivisionChange = async (divisionID) => {
     setDivision(divisionID); // Set the selected division ID
+    // find the division name
+    const selectedDivision = divisions.find((dv) => dv.id === divisionID);
+    if (selectedDivision) {
+      setDivisionName(selectedDivision.name); // Set the division name
+    }
     try {
       const res = await fetch(
         `https://bdapi.vercel.app/api/v.1/district/${divisionID}`
       );
       const data = await res.json();
       setDistricts(data.data);
-      setUpazillas([]); // Reset upazillas when division changes
+      setUpazillas([]);
     } catch (error) {
       setError(error.message);
     }
@@ -84,6 +93,13 @@ const ClientList = () => {
   // Handle district change
   const handleDistrictChange = async (districtID) => {
     setDistrict(districtID); // Set the selected district ID
+    // find the distic name
+    const selectedDistictName = districts.find(
+      (dist) => dist.id === districtID
+    );
+    if (selectedDistictName) {
+      setDistrictName(selectedDistictName.name); // Set the division name
+    }
     try {
       const res = await fetch(
         `https://bdapi.vercel.app/api/v.1/upazilla/${districtID}`
@@ -94,6 +110,16 @@ const ClientList = () => {
       setError(error.message);
     }
   };
+
+  // find the upazila name  handleUpazilaName
+  const handleUpazilaName = (upazilaID) => {
+    // find the distic name
+    const selectedUpazilaID = upazillas.find((up) => up.id === upazilaID);
+    if (selectedUpazilaID) {
+      setUpazilaName(selectedUpazilaID.name);
+    }
+  };
+
   // Fetch data from API
   useEffect(() => {
     axios
@@ -172,12 +198,13 @@ const ClientList = () => {
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+
   return (
     <div className="container dashboard_All">
       <ToastContainer />
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <div>
-        <div className="flex text-right">
+        <div className="flex text-right justify-between mt-1">
           <div>
             <Link to="/dashboard/client/create">
               <button className="button-62 mb-8" role="button">
@@ -189,6 +216,15 @@ const ClientList = () => {
             </Link>
           </div>
           <p className="success-message">{faqToDelete}</p>
+          {/* Button to download Excel */}
+          <ReactHTMLTableToExcel
+            id="export-table-xls-button"
+            className="button-62 h-12"
+            table="client-table"
+            filename="ClientList"
+            sheet="ClientData"
+            buttonText="Download as Excel"
+          />
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-8 gap-7">
@@ -244,21 +280,51 @@ const ClientList = () => {
               onChange={(e) => {
                 setUpazila(e.target.value);
                 handleFilter(e.target.value);
+                handleUpazilaName(e.target.value);
               }}
             >
               <option value="">Choose Upazilla</option>
               {upazillas.map((upa) => (
-                <option key={upa.id} value={upa.name}>
+                <option key={upa.id} value={upa.id}>
                   {upa.name}
                 </option>
               ))}
             </select>
-          </div>        
+          </div>
         </div>
 
         <p className="my-7 text-xl">
           Total Result = {filteredClientList.length}
         </p>
+        {/* exel table  */}
+        <table id="client-table" className="hidden">
+          <thead>
+            <tr>
+              <th>UnionName Name Bangla</th>
+              <th>UnionName Name English</th>
+              <th>Division</th>
+              <th>District</th>
+              <th>Upazilla</th>
+              <th>WhatsApp</th>
+              <th>Email</th>
+              <th>Phone</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredClientList.map((cl, index) => (
+              <tr key={index}>
+                <td>{cl.unNameBn}</td>
+                <td>{cl.unNameEn}</td>
+                <td>{divisionName}</td>
+                <td>{districtName}</td>
+                <td>{UpazilaName}</td>
+                <td>{cl.upWhatsappNumber}</td>
+                <td>{cl.UpEmail}</td>
+                <td>{cl.upContactNumber}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
         {/* Client List Display */}
         <div className="grid gird-cols-1 md:grid-cols-3 gap-5 ">
           {filteredClientList.length > 0 ? (
