@@ -21,7 +21,6 @@ import {
 import { BsExclamationCircle } from "react-icons/bs";
 import { HiPlus } from "react-icons/hi";
 import Pagination from "../../Pagination/Pagination";
-import ReactHTMLTableToExcel from "react-html-table-to-excel";
 
 const ClientList = () => {
   const { state } = useContext(AppContext);
@@ -199,6 +198,35 @@ const ClientList = () => {
     setCurrentPage(pageNumber);
   };
 
+  // execl file downlode
+  function exportToCSV() {
+    let table = document.getElementById("client-table");
+    let rows = Array.from(table.rows);
+    let csvContent = rows
+      .map((row) => {
+        return Array.from(row.cells)
+          .map((cell) => {
+            // Ensure that special characters are handled properly
+            return cell.textContent.replace(/,/g, ""); // Remove any commas to avoid breaking CSV format
+          })
+          .join(",");
+      })
+      .join("\n");
+
+    // Add BOM (Byte Order Mark) to ensure proper encoding for non-ASCII characters
+    let csvBlob = new Blob(["\uFEFF" + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    let link = document.createElement("a");
+    let url = URL.createObjectURL(csvBlob);
+    link.href = url;
+    link.setAttribute("download", "ClientList.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   return (
     <div className="container dashboard_All">
       <ToastContainer />
@@ -217,14 +245,18 @@ const ClientList = () => {
           </div>
           <p className="success-message">{faqToDelete}</p>
           {/* Button to download Excel */}
-          <ReactHTMLTableToExcel
+          {/* <ReactHTMLTableToExcel
             id="export-table-xls-button"
             className="button-62 h-12"
             table="client-table"
             filename="ClientList"
             sheet="ClientData"
             buttonText="Download as Excel"
-          />
+          /> */}
+
+          <button className="button-62 h-12" onClick={exportToCSV}>
+            Download as CSV
+          </button>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-8 gap-7">
