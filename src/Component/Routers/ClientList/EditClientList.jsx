@@ -238,7 +238,7 @@ const EditClientList = () => {
               >
                 <option value="">Choose Upazilla</option>
                 {upazillas.map((upazilla) => (
-                  <option key={upazilla.id} value={upazilla.id}>
+                  <option key={upazilla.id} value={upazilla.name}>
                     {upazilla.name}
                   </option>
                 ))}

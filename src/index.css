@@ -362,14 +362,13 @@ ul li a {
   cursor: pointer;
   display: inline-block;
   font-family: var(--font-main);
-  font-size: 19px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 2.5;
   outline: transparent;
-  padding: 0 1rem;
+  padding: 0 0.5rem;
   text-align: center;
   text-decoration: none;
-  transition: box-shadow 0.2s ease-in-out;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
@@ -377,7 +376,7 @@ ul li a {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
 }
 
 /* Add certificate */

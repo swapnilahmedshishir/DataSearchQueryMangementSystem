@@ -111,13 +111,12 @@ const ClientList = () => {
   };
 
   // find the upazila name  handleUpazilaName
-  const handleUpazilaName = (upazilaID) => {
-    // find the distic name
-    const selectedUpazilaID = upazillas.find((up) => up.id === upazilaID);
-    if (selectedUpazilaID) {
-      setUpazilaName(selectedUpazilaID.name);
-    }
-  };
+  // const handleUpazilaName = (upazilaID) => {
+  //   const selectedUpazilaID = upazillas.find((up) => up.id === upazilaID);
+  //   if (selectedUpazilaID) {
+  //     setUpazilaName(selectedUpazilaID.name);
+  //   }
+  // };
 
   // Fetch data from API
   useEffect(() => {
@@ -138,6 +137,7 @@ const ClientList = () => {
 
   // Filter clients based on division, district, and upazila
   const handleFilter = (e) => {
+    console.log(e);
     const filteredData = clientList.filter((client) => {
       return (
         client.districtName.toLowerCase() === e?.toLowerCase() ||
@@ -232,10 +232,10 @@ const ClientList = () => {
       <ToastContainer />
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <div>
-        <div className="flex text-right justify-between mt-1">
+        <div className="flex text-right justify-between sm:mt-3 sm:mb-5">
           <div>
             <Link to="/dashboard/client/create">
-              <button className="button-62 mb-8" role="button">
+              <button className="button-62" role="button">
                 <span>New Client</span>
                 <span>
                   <HiPlus />
@@ -243,20 +243,12 @@ const ClientList = () => {
               </button>
             </Link>
           </div>
-          <p className="success-message">{faqToDelete}</p>
           {/* Button to download Excel */}
-          {/* <ReactHTMLTableToExcel
-            id="export-table-xls-button"
-            className="button-62 h-12"
-            table="client-table"
-            filename="ClientList"
-            sheet="ClientData"
-            buttonText="Download as Excel"
-          /> */}
-
-          <button className="button-62 h-12" onClick={exportToCSV}>
-            Download as CSV
+          <button className="button-62 h-10" onClick={exportToCSV}>
+            Download CSV
           </button>
+
+          <p className="success-message">{faqToDelete}</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-8 gap-7">
@@ -312,12 +304,11 @@ const ClientList = () => {
               onChange={(e) => {
                 setUpazila(e.target.value);
                 handleFilter(e.target.value);
-                handleUpazilaName(e.target.value);
               }}
             >
               <option value="">Choose Upazilla</option>
               {upazillas.map((upa) => (
-                <option key={upa.id} value={upa.id}>
+                <option key={upa.id} value={upa.name}>
                   {upa.name}
                 </option>
               ))}
@@ -349,7 +340,7 @@ const ClientList = () => {
                 <td>{cl.unNameEn}</td>
                 <td>{divisionName}</td>
                 <td>{districtName}</td>
-                <td>{UpazilaName}</td>
+                <td>{cl.upazilla}</td>
                 <td>{cl.upWhatsappNumber}</td>
                 <td>{cl.UpEmail}</td>
                 <td>{cl.upContactNumber}</td>
