@@ -15,7 +15,7 @@ const ShowClinetList = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [clientInfo, setClientInfo] = useState({});
 
-  // dision and districts
+  // division  and districts
   const [filteredDivision, setFilteredDivision] = useState(null);
   const [filteredDistict, setFilteredDistict] = useState(null);
 

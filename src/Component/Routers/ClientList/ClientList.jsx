@@ -7,7 +7,8 @@ import { AppContext } from "../../../Dashbord/SmallComponent/AppContext";
 import { FaWhatsapp } from "react-icons/fa6";
 import { BiSolidPhoneCall } from "react-icons/bi";
 import { IoIosMail } from "react-icons/io";
-
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import {
   Dialog,
   useTheme,
@@ -21,8 +22,10 @@ import {
 import { BsExclamationCircle } from "react-icons/bs";
 import { HiPlus } from "react-icons/hi";
 import Pagination from "../../Pagination/Pagination";
+import NikoshFont from "../../../BanglaFront/Nikosh-normal";
 
 const ClientList = () => {
+  // useContext and hook
   const { state } = useContext(AppContext);
   const navigate = useNavigate();
 
@@ -34,13 +37,13 @@ const ClientList = () => {
   const [upazila, setUpazila] = useState("");
   const [divisionName, setDivisionName] = useState("");
   const [districtName, setDistrictName] = useState("");
-  const [UpazilaName, setUpazilaName] = useState("");
 
   const [open, setOpen] = useState(false);
   const [dataDeleteId, setDataDeleteId] = useState(null);
   const [faqToDelete, setFaqToDelete] = useState(null);
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+
   // pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [paginatedData, setPaginatedData] = useState([]);
@@ -110,14 +113,6 @@ const ClientList = () => {
     }
   };
 
-  // find the upazila name  handleUpazilaName
-  // const handleUpazilaName = (upazilaID) => {
-  //   const selectedUpazilaID = upazillas.find((up) => up.id === upazilaID);
-  //   if (selectedUpazilaID) {
-  //     setUpazilaName(selectedUpazilaID.name);
-  //   }
-  // };
-
   // Fetch data from API
   useEffect(() => {
     axios
@@ -137,7 +132,6 @@ const ClientList = () => {
 
   // Filter clients based on division, district, and upazila
   const handleFilter = (e) => {
-    console.log(e);
     const filteredData = clientList.filter((client) => {
       return (
         client.districtName.toLowerCase() === e?.toLowerCase() ||
@@ -227,6 +221,64 @@ const ClientList = () => {
     document.body.removeChild(link);
   }
 
+  // Export to PDF function
+  const exportToPDF = () => {
+    const pdf = new jsPDF("p", "mm", "a4");
+    pdf.text("Client List", 15, 15);
+
+    // Load the custom Bangla font
+    pdf.addFileToVFS("Nikosh.ttf", NikoshFont); // Use the name of your converted font file
+    pdf.addFont("Nikosh.ttf", "Nikosh", "normal"); // Add the font with a label
+    pdf.setFont("Nikosh"); // Set the font to use
+    // pdf.setFontSize(12);
+
+    const headers = [
+      [
+        "ID",
+        "UnionName(বাংলা)",
+        "UnionName(English)",
+        "Division",
+        "District",
+        "Upazilla",
+        // "WhatsApp",
+        "Email",
+        "Phone",
+      ],
+    ];
+
+    // Map your client data to the format required by autoTable
+    const data = filteredClientList.map((client, index) => [
+      index,
+      client.unNameBn,
+      client.unNameEn,
+      divisionName,
+      // || fetchDivisions(client.divisionName),
+      districtName,
+      client.upazilla,
+      // client.upWhatsappNumber,
+      client.UpEmail,
+      client.upContactNumber,
+    ]);
+
+    // Add the table to the PDF
+    pdf.autoTable({
+      startY: 25, // Y position from where the table should start
+      head: headers,
+      body: data,
+      theme: "grid", // You can also use 'striped', 'plain', etc.
+      styles: {
+        fontSize: 6, // Font size for table content
+        font: "Nikosh", // Make sure to use the custom font here
+      },
+      headStyles: {
+        fillColor: [22, 160, 133], // Color for the header
+      },
+      margin: { top: 10 },
+    });
+
+    pdf.save("download.pdf");
+  };
+
   return (
     <div className="container dashboard_All">
       <ToastContainer />
@@ -247,6 +299,10 @@ const ClientList = () => {
           <button className="button-62 h-10" onClick={exportToCSV}>
             Download CSV
           </button>
+          {/* Button to download PDF */}
+          <button className="button-62 h-10" onClick={exportToPDF}>
+            Download PDF
+          </button>
 
           <p className="success-message">{faqToDelete}</p>
         </div>
@@ -260,7 +316,9 @@ const ClientList = () => {
               id="division"
               className="text_input_field"
               value={division}
-              onChange={(e) => handleDivisionChange(e.target.value)}
+              onChange={(e) => {
+                handleDivisionChange(e.target.value);
+              }}
             >
               <option value="">Choose Division</option>
               {divisions.map((dv) => (
@@ -319,7 +377,7 @@ const ClientList = () => {
         <p className="my-7 text-xl">
           Total Result = {filteredClientList.length}
         </p>
-        {/* exel table  */}
+        {/* exel  data table  */}
         <table id="client-table" className="hidden">
           <thead>
             <tr>
@@ -348,6 +406,7 @@ const ClientList = () => {
             ))}
           </tbody>
         </table>
+
         {/* Client List Display */}
         <div className="grid gird-cols-1 md:grid-cols-3 gap-5 ">
           {filteredClientList.length > 0 ? (
@@ -427,7 +486,7 @@ const ClientList = () => {
           )}
         </div>
         <Pagination
-          totalItems={clientList.length}
+          totalItems={filteredClientList.length}
           itemsPerPage={itemsPerPage}
           currentPage={currentPage}
           onPageChange={handlePageChange}
