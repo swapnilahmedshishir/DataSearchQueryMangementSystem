@@ -102,7 +102,7 @@ The backend is robustly designed with the following tools:
 4. Visit `http://localhost:5173` in your browser to explore the application.
 
 5. Admin Login info Email: admin@gmail.com & password: 1234
-6. ![screencapture-dashboard-tojoglobal-dashboard-2024-07-14-12_07_10](https://github.com/user-attachments/assets/fb06927a-f377-40e8-af6f-27822d90c3cd)
+6. ![screencapture-dashboard-tojoglobal-dashboard-2024-07-14-12_07_10](https://i.ibb.co.com/fGCMB98/Amazin-Data-Filter-Application.png)
 
 ### Developer Info
 
